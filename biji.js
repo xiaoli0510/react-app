@@ -49,6 +49,8 @@ export default App;
 import './App.css';
 import React from 'react';
 
+props不可更改，子组件只能通过props来传递数据,可通过 类名.defaultProps={xx:xx}来设置默认的props。
+
 //因为class组件需要继承React.Component,所以需要import React,React.Component的子类中必须定义render()函数。
 class App extends React.Component {//extends是es6里面的继承语法
   render() {
@@ -61,6 +63,7 @@ React里面没有“槽”的概念。React通过props可传递任何东西;通�
 使用组件的思想：先提取，后组合。
 
 5.State&生命周期。
+state可更改,state是用来跟用户交互。
 修改src>app.js文件为：
 import './App.css';
 import React from 'react';
@@ -115,6 +118,8 @@ function App(){
 }
 export default App;
 页面会显示一个时钟和计数器。
+6.事件处理。
+react的onClick使用驼峰命名法，与传统html的onclick不同。
 
 
 
