@@ -1,45 +1,27 @@
 import './App.css'
 import React from 'react'
 
-class Reservation extends React.Component{
+//以下是一个非受控组件，表单数据交由DOM节点来处理
+class FileInput extends React.Component{
   constructor(props){
-    super(props);
-    this.state = {
-      isGoing:true,
-      numbersOfGuest:2
-    };
-    this.handleInputChange = this.handleInputChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
-
-  handleInputChange(event){
-    const name = event.target.name;
-    const value = name==='isGoing'?event.target.checked:event.target.value;
-    this.setState({
-      [name]:value
-    })
+   super(props);
+   this.fileInput = React.createRef();//返回的是一个ref对象，在dom元素上通过ref去绑定，通过this.fileInput.current来获取当前的node节点。
+   this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   handleSubmit(event){
-    console.log('提交的参与是：'+this.state.isGoing);
-    console.log('提交的来宾人数是：'+this.state.numbersOfGuest);
+    console.log('提交的fileName是：'+this.fileInput.current.files[0].name)
     event.preventDefault();
   }
 
   render(){
-    return(
+    return (
       <form onSubmit={this.handleSubmit}>
         <label>
-          参与：
-          <input type="checkbox" checked={this.state.isGoing} name="isGoing" onChange={this.handleInputChange}/>
+          Upload file:
+          <input type="file" ref={this.fileInput}/>
         </label>
-        <br/>
-        <label>
-          来宾人数：
-          <input type="number" name="numbersOfGuest" value={this.state.numbersOfGuest} onChange={this.handleInputChange}/>
-        </label>
-        <br/>
-        <input type="submit" value="提交" />
+        <input type="submit" value="提交"/>
       </form>
     )
   }
@@ -51,8 +33,9 @@ class Reservation extends React.Component{
 function App(){
   return (
     <div className="App-header">
-    <Reservation/>
+    <FileInput/>
     </div>
   )
 }
 export default App
+
