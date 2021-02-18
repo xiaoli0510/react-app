@@ -6,7 +6,7 @@ function SearchBar (props){
     <div>
       <input placeholder="Search..." onChange={props.handleSearch}/>
       <br/>
-      <input type="checkbox"/><span>Only show products in stock</span>
+      <input type="checkbox" onChange={props.handleCheck}/><span>Only show products in stock</span>
     </div>
   )
 }
@@ -20,8 +20,6 @@ class ProductTable extends React.Component{
         categoryArr.push(item.category);
       }
    })
-
-   console.log(categoryArr)
 
    let wrapDiv = productArr.map((item,index)=>{
      let productCategoryRowContent = '';
@@ -79,14 +77,21 @@ class FilterableProductTable extends React.Component{
   constructor(props){
    super(props);
    this.state = {
-     searchValue:''
+     searchValue:'',
+     isChecked:false
    }
    this.handleSearch = this.handleSearch.bind(this);
+   this.handleCheck = this.handleCheck.bind(this);
   }
 
   //进行搜索
   handleSearch(e){
      this.setState({searchValue:e.target.value});
+  }
+
+  //复选框的选中
+  handleCheck(e){
+     this.setState({isChecked:e.target.checked})
   }
 
   render(){
@@ -99,12 +104,16 @@ class FilterableProductTable extends React.Component{
       {category: "Electronics", price: "$199.99", stocked: true, name: "Nexus 7"}
     ];
     productArr = productArr.filter(item=>{
-      return item.name.indexOf(this.state.searchValue)>-1;
+        if(this.state.isChecked){
+          return item.name.indexOf(this.state.searchValue)>-1&&item.stocked===this.state.isChecked;
+        }else{
+          return item.name.indexOf(this.state.searchValue)>-1;
+        }
     })
 
     return (
       <div className="box">
-        <SearchBar handleSearch={this.handleSearch}/>
+        <SearchBar handleSearch={this.handleSearch} handleCheck={this.handleCheck}/>
         <ProductTable productArr={productArr}/>
       </div>
     )
