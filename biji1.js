@@ -8,11 +8,4 @@
  (3)在dom元素上直接使用bind,onClick={this.fn.bind(this)}。
  (4)监听的是箭头函数，即定义fn的时候使用fn = ()=>{}。
 
- http://jira.acadsoc.com.cn:8080/browse/ADM-60007 1d
- http://jira.acadsoc.com.cn:8080/browse/ADM-60111 2d
-http://jira.acadsoc.com.cn:8080/browse/ADM-60464 1d 
-http://jira.acadsoc.com.cn:8080/browse/ADM-60462 1d
-
-http://jira.acadsoc.com.cn:8080/browse/ADM-60966 备用一下 
-
  */
