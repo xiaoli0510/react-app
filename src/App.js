@@ -1,44 +1,60 @@
 import './App.css'
-//异步组件不能单独使用 需要结合React的Suspense组件来使用,Suspenese的fallback里面是加载的内容
-//React.lazy只支持默认导出，如果使用命名导出，那么需要创建一个中间模块，来重新导出为默认模块,然后导入中间模块即可
 import React from 'react'
 
-//如果仅仅是为了多层级的传递props，可以用传递组件的形式来代替context,即将子组件通过props的形式传递给顶级组件，缺点是会让顶级组件变复杂，并强行让底层组件适用这样的形式
-//在组件树中，未检测到Provider的时候，defaultValue才会生效。Provider的value为undefined时，defaultValue不会生效。
-//当Provider的value发生变化时，它内部的所有消费组件都会重新渲染。
-const ThemeContext = React.createContext('light');//每个Context对象都会返回一个Provider React组件，它允许消费组件订阅context的变化。
+//ref的三种使用方法
+/*
+1.string类型绑定，通过this.refs.inputRef来获取当前绑定ref的dom元素。此方法已经废弃。
+2.react.createRef,通过此方法创建ref,然后在dom上通过ref属性进行绑定，通过this.inputRef.current来huo获取当前绑定ref的dom元素。
+3.函数形式。
+*/
+//ref不能用在函数组件上，因为函数组件没有实例
+//以下是函数形式实现的ref,在父组件中获取子组件的ref
 class App extends React.Component{
+  constructor(props){
+    super(props);
+    this.sonFocus = this.sonFocus.bind(this);
+  }
+  //使用ref的函数回调,将Son组件的this赋值给this.sonRef
+  sonRef = null;
+  getSonRef=el=>this.sonRef=el;
+  //input的focus函数
+  sonFocus=()=>{
+    this.sonRef.focus();
+  }
   render(){
-    return (
-      <div className="App-header">
-        <ThemeContext.Provider value="dark">
-          <Toolbar/>
-          </ThemeContext.Provider>
+    return(
+     <div>
+       <div>父组件</div>
+       <Son bindRef={this.getSonRef}/>
+       <button onClick={this.sonFocus}>父组件按钮</button>
+     </div>
+    )
+  }
+}
+
+class Son extends React.Component{
+  constructor(props){
+    super(props);
+    this.focus = this.focus.bind(this);
+    //将Son组件的this返回
+    props.bindRef(this);
+  }
+  //使用ref的函数回调,在dom上通过ref绑定ref的函数回调
+  inputRef = null;
+  fnRef=el=>this.inputRef = el;
+  //input的focus函数
+  focus=()=>{
+    this.inputRef.focus();
+  }
+  render(){
+    return(
+      <div>
+        <input type="text" ref={this.fnRef}/>
+        <button onClick={this.focus}>focus input</button>
       </div>
     )
   }
 }
-
-//使用context后，中间件就不需要指名去传递props
-function Toolbar(){
-  return (
-    <div>
-      <ThemeButton/>
-    </div>
-  )
-}
-
-class ThemeButton extends React.Component{
-  //指定contextType读取当前的ThemeContext,React会向上寻找最近的ThemeContext.Provider,然后使用它的值。
-  static contextType =ThemeContext;
-  render(){
-    return (
-      <button theme={this.context}>这是一个按钮</button>
-    )
-  }
-}
-
-
 
 export default App
 
