@@ -12,6 +12,7 @@ props默认值为true。
 props属性展开。
 jsx可以返回一组数组，需注明key。
 js表达式可作为子元素。
+函数作为子元素
 */
 
 //将函数push到items，注意,props.children是一个函数，需要执行props.children(i)才返回div
