@@ -5,9 +5,7 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App name="小明"/>
-  </React.StrictMode>,
+    React.createElement(App,{toWhat: 'World12'}, null),
   document.getElementById('root')
 );
 /**StrictMode是启用严格模式，功能有：
