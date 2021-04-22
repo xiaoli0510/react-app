@@ -1,108 +1,75 @@
 import './App.css'
 import React from 'react'
-import catImg from './assets/cat.jpg'
+import PropTypes from 'prop-types'
+
 
 /*
-render prop:指一种在React组件之间使用一个值为函数的prop共享代码的简单技术，来解决横切关注点(Cross-Cutting Concern)。
+使用PropTypes进行类型检查。验证数据的类型，如果类型与定义的类型不一致，js控制台会显示静态，但还是会编译成功。
+在后面添加isRequired表示此prop是必需的。
+使用PropTypes.element表示此prop只包含一个元素。
+使用transform-class-properties的Babel转换工具时，可在React组件内声明defaultProps作为静态属性。
 */
 
-//需求：有一个cat cat跟随鼠标的移动而移动
-// class Cat extends React.Component{
+// class Greeting extends React.Component{
 //   render(){
-//     const mouse = this.props.mouse;
-//     return (
-//       <img src={catImg} style={{position:'absolute',left:mouse.x,top:mouse.y,width:'10%'}}/>
+//     return(
+//       <div>Hello,{this.props.name}</div>
 //     )
 //   }
 // }
 
-// //以下并没有达到可复用
-// class MouseWithCat extends React.Component{
-//   constructor(props){
-//     super(props);
-//     this.state = {x:0,y:0};
-//     this.handleMouseMove = this.handleMouseMove.bind(this);
-//   }
-  
-//   handleMouseMove(event){
-//     this.setState({
-//       x:event.clientX,
-//       y:event.clientY
-//     })
-//   }
-
-//   render(){
-//     return (
-//       <div onMouseMove={this.handleMouseMove}>
-//         <Cat mouse={this.state}/>
-//       </div>
-//     )
-//   }
+// Greeting.propTypes = {
+//   name:PropTypes.string
 // }
 
-// class MouseTracker extends React.Component{
+
+
+//限制prop只包含一个元素
+// class MyComponent extends React.Component{
 //   render(){
-//     return (
+//     const children = this.props.children;
+//     return(
 //       <div>
-//         <h1>鼠标移动</h1>
-//         <MouseWithCat/>
+//         123
+//         {children}
 //       </div>
 //     )
 //   }
 // }
 
-class Cat extends React.Component{
+// MyComponent.propTypes = {
+//   children:PropTypes.element.isRequired
+// }
+
+// function One(){
+//  return (
+//    <div>One</div>
+//  )
+// }
+
+// function App(props){
+//   return(
+//     <MyComponent children={<One/>}/>
+//   )
+// }
+
+class Greeting extends React.Component{
+  static defaultProps={
+    name:'stranger'
+  }
+  
   render(){
-    const mouse = this.props.mouse;
     return (
-      <img src={catImg} alt="cat" style={{position:'absolute',width:'10%',left:mouse.x,top:mouse.y}}/>
+      <div>Hello,{this.props.name}</div>
     )
   }
 }
 
-class Mouse extends React.Component{
-  constructor(props){
-    super(props);
-    this.state={x:0,y:0};
-    this.handleMouseMove = this.handleMouseMove.bind(this);
-  }
-
-  handleMouseMove(event){
-    this.setState({
-      x:event.clientX,
-      y:event.clientY
-    })
-  }
-
-  render(){
-    return (
-      <div onMouseMove={this.handleMouseMove}>
-        {this.props.render(this.state)}
-      </div>
-    )
-  }
-}
-
-class MouseTracker extends React.Component{
-  render(){
-    return (
-     <div>
-       <h1>移动鼠标</h1>
-       <Mouse render={mouse=>(
-        <Cat mouse={mouse}/>
-      )}/>
-     </div>
-    )
-  }
-}
-
-function App(props) {
-  return ( <div>
-    <MouseTracker/ >
-    </div>
+function App(props){
+  return(
+    <Greeting/>
   )
 }
-
 
 export default App
 
