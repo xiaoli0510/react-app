@@ -1,72 +1,104 @@
 import './App.css'
 import React from 'react'
+import catImg from './assets/cat.jpg'
 
 /*
-Refs&Dom:
-使用ref去存储DOM节点的引用。React会在组件挂载的时候给current属性传入DOM元素，并在组件卸载的时候传入null值。ref会在componentDidMount()和componentDidUpdate()生命周期钩子触发前更新。
-默认情况下，不能在函数组件上使用ref属性，因为函数组件没有实例。在函数组件内部使用ref属性时，需使用useRef(null)来生成ref,并将生成的ref指向一个DOM元素或class组件。
+render prop:指一种在React组件之间使用一个值为函数的prop共享代码的简单技术，来解决横切关注点(Cross-Cutting Concern)。
 */
 
-class CustomTextInput extends React.Component{
+//需求：有一个cat cat跟随鼠标的移动而移动
+// class Cat extends React.Component{
+//   render(){
+//     const mouse = this.props.mouse;
+//     return (
+//       <img src={catImg} style={{position:'absolute',left:mouse.x,top:mouse.y,width:'10%'}}/>
+//     )
+//   }
+// }
+
+// //以下并没有达到可复用
+// class MouseWithCat extends React.Component{
+//   constructor(props){
+//     super(props);
+//     this.state = {x:0,y:0};
+//     this.handleMouseMove = this.handleMouseMove.bind(this);
+//   }
+  
+//   handleMouseMove(event){
+//     this.setState({
+//       x:event.clientX,
+//       y:event.clientY
+//     })
+//   }
+
+//   render(){
+//     return (
+//       <div onMouseMove={this.handleMouseMove}>
+//         <Cat mouse={this.state}/>
+//       </div>
+//     )
+//   }
+// }
+
+// class MouseTracker extends React.Component{
+//   render(){
+//     return (
+//       <div>
+//         <h1>鼠标移动</h1>
+//         <MouseWithCat/>
+//       </div>
+//     )
+//   }
+// }
+
+class Cat extends React.Component{
+  render(){
+    const mouse = this.props.mouse;
+    return (
+      <img src={catImg} alt="cat" style={{position:'absolute',width:'10%',left:mouse.x,top:mouse.y}}/>
+    )
+  }
+}
+
+class Mouse extends React.Component{
   constructor(props){
     super(props);
-    this.textInput = React.createRef();
-    this.handleClick = this.handleClick.bind(this);
+    this.state={x:0,y:0};
+    this.handleMouseMove = this.handleMouseMove.bind(this);
   }
-  handleClick(){
-    this.textInput.current.focus();
-    // this.$refs.textInput.current.focus();
+
+  handleMouseMove(event){
+    this.setState({
+      x:event.clientX,
+      y:event.clientY
+    })
   }
+
   render(){
     return (
-      <div>
-        <input type="text" ref={this.textInput}/>
-        <input type="button" value="Focus the text input" onClick={this.handleClick}/>
+      <div onMouseMove={this.handleMouseMove}>
+        {this.props.render(this.state)}
       </div>
     )
   }
 }
 
-//在父组件中使用ref来获取这个自定义的input组件并手动调用他的handleClick方法
-class AutoFocusTextInput extends React.Component{
-  constructor(props){
-    super(props);
-    this.textInput = React.createRef();
-  }
-  componentDidMount(){
-    this.textInput.current.handleClick();
-  }
+class MouseTracker extends React.Component{
   render(){
     return (
-      <CustomTextInput ref={this.textInput}/>
+     <div>
+       <h1>移动鼠标</h1>
+       <Mouse render={mouse=>(
+        <Cat mouse={mouse}/>
+      )}/>
+     </div>
     )
   }
 }
 
-//使用ref回调函数
-function CustomTextInput1(props){
-  return (
-    <div>
-     <input ref={props.inputRef}/>
-    </div>
-  )
-}
-  
-class Parent extends React.Component{
-  constructor(props){
-    super(props);
-    this.inputElement=null
-  }
-    render(){
-      return (
-        <CustomTextInput1 inputRef={el=>this.inputElement=el}/>
-        )
-    }
-}
-
 function App(props) {
   return ( <div>
-    <Parent/ >
+    <MouseTracker/ >
     </div>
   )
 }
