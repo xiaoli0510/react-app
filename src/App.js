@@ -3,81 +3,24 @@ import React from 'react'
 
 
 /*
-props不能直接复制给state,直接复制会有bug。
-如果有需要将props复制给state的场景时，需要考虑是受控组件还是非受控组件。
-对于受控组件：在父组件里管理state.draftValue和state.committedValue,直接控制子组件里的值。不要在子组件中被动的接受一个props并跟踪一个临时的state.value。
-对于不受控组件：建议重置内部所有的state,使用key。有两种方法，一是仅更改某些字段，观察特殊属性的变化，二是使用ref调用实例方法。
+ReactDOM:
+(1)ReactDOM.render(element,container,[,callback]):在提供的container里面渲染一个React元素，并返回对该组件的引用(针对无状态组件返回null)。
+如果React元素之前已经在container里面渲染过，这将会对其进行更新操作，并仅会在必要时改变DOM以映射最新的React元素。
+第三参数是可选的回调函数，在该组件被渲染或更新后会执行回调函数。
+ReactDOM.render()会控制传入容器节点的内容。首次调用时，container里面所有的DOM元素都会被替代。后续的调用会调用Diffing算法进行更新。
+ReactDOM.render()不会修改容器节点(只会修改container的子节点)。可以在不覆盖子节点的情况下，将组件插入已有的DOM节点中。
+ReactDOM.render()目前会返回对根组件ReactComponent实例的引用。但是目前要避免使用该引用。
+(2)ReactDOM.hydrate(element,container,[,callback]):用于在ReactDOMServer渲染的容器中对HTML的内容进行hydrate操作。
+(3)unmountComponentAtNode(container):从DOM中卸载组件，会将其事件处理器和state一起清除。如果指定容器上没有对应已挂载的组件，则此函数什么都不做。如果组件被移除返回true,如果没有组件被移除返回false。
+(4)ReactDOM.findDOMNode(component):访问底层DOM节点，应避免使用，不能用在函数组件中。
+(5)ReactDOM.createPortal(child,container):创建portal。Portal提供一种将子节点渲染到DOM节点中的方式，该节点存在于DOM组件的层次结构之外。
 
-使用派生state.
-反面教材：1.缓存基于当前props计算后的结果，建议使用memoize
+ReactDOMServer:将组件渲染成静态标记。
 
-(1)挂载：当组件实例被创建并插入DOM中时，生命周期调用顺序如下：
-constructor()
-static getDerivedStateFromProps()
-render()
-componentDidMount()
-(2)更新：当组件的props或state发生改变时会触发更新，更新的生命周期调用顺序如下：
-static getDerivedStateFromProps()：get
-shouldComponentUpdate()：如果shouldComponentUpdate返回的是false,那么将不会执行render()。
-render()
-getSnapshotBeforeUpdate()：此函数返回的数据会当做componentDidUpdate函数里面的第三个参数。
-componentDidUpdate()
-(3)卸载：当组件从DOM中移除时会，卸载的生命周期调用顺序如下：
-componentWillUnmount()
-(4)错误处理：当渲染过程、生命周期、或子组件的构造函数中抛出异常时，调用顺序如下：
-state getDerivedStateFromError()
-componentDidCatch()
-(5)其他API：
-setState()
-forceUpdate()
-(6)class属性：
-defaultProps
-displayName
-(7)实例属性
-state
-props
+DOM元素：React实现了一套独立于浏览器的DOM系统。所有的DOM特性和属性都应该使用小驼峰命名的方式。
 
-常见生命周期：
-(1)render():render函数应该是一个纯函数(函数的返回结果只依赖于它的参数，并且在执行过程里面没有副作用)，并且它不会直接与浏览器交互。当render()被调用时，它会检查this.props和this.state的变化，并返回一下类型的数据：
-React元素。
-数组或fragments。
-Portals。
-字符串或者数值。
-布尔类型或者null。
-(2)constructor():如果不初始化state或不进行方法绑定，则不需要为React组件实现构造函数。
-在React组件挂载之前，会调用它的构造函数。在未React.Component子类实现构造函数时，应在其他语句之前调用super(props)，否则this.props在构造函数中可能会出现undefined的bug。
-注意：避免在constructor中使用setState(),避免将props直接赋值给state。
-(3)componentDidMount():会在组件挂载后(插入DOM树)立即调用。依赖于DOM节点的初始化和数据请求和添加订阅(需在componentWillUnmount里面取消订阅)发生在此生命周期。在此执行setState()会触发额外渲染,但是此渲染
-发生在浏览器更新屏幕之前，如此保证两次render()后，用户不会看到中间的状态。
-(4)componentDidUpdate(prveProps,prevState,snapshot):会在更新后立即被地调用，首次渲染的时候不会调用componentDidUpdate()。
-第3个参数是getSnapshotBeforeUpdate()返回的数据，如无则是undefined。
-在componentDidUpdate里面执行setState需要包裹在if语句里面，否则会导致死循环。
-可根据if语句来进行ajax请求。
-可在此处对DOM进行修改。
-注意：shouldComponentUpdate()返回值为false时，则不会调用componentDidUpdate()。
-(5)componentWillUnmount():会在组件卸载及销毁前直接调用。在此方法中执行必要的清理操作，比如清除timer、取消网络请求、清除在componentDidMount()中创建的订阅等。
-注意：不应在此生命周期中执行setState(),因为组件永远不会重新重新渲染。组件实例卸载后，将永远不会再挂载它。
-
-不常用的生命周期方法：
-(1)shouldComponentUpdate(nextProps,nextState):此方法仅作为性能优化的方式而存在。此方法返回false时，则不会调用render()和componentDidUpdate()方法。
-注意：进行的是浅比较。不建议在此方法中进行深比较或者JSON.stringify()。
-(2)static getDerivedStateFromProps(props,state):会在每次渲染之前调用，并且在初始挂载及后续更新时都会被调用。它应返回一个对象来更新state，或者返回null表示不做任何更新。
-(3)getSnapshotBeforeUpdate(prevProps,prevState):在最近一次渲染输出(提交到DOM节点)之前调用。此生命周期的任何返回值都会作为componentDidUpdate()的第三个参数。
-使组件能在发生更改之前从DOM中获取一些信息(例如：滚动位置)，用来处理滚动位置的聊天进程等。
-
-Error boundaries:是React组件，它会在其子组件树中的任何位置捕获js错误，并记录这些错误，展示降级UI而不是崩溃的组件树。
-如果在class组件中使用static getDerivedStateFromError()或者componentDidCatch()中的一个或两个，就成为了Error boundaries。
-注意：仅使用Error boundaries组件来从意外异常中恢复的情况，不要将它们用于流程控制。仅捕获组件树中以下组件中的错误，但它本身的错误无法捕获。
-static getDerivedStateFromError(error)：将抛出的错误作为参数，并返回一个值以更新state。会在render阶段调用，因此不允许出现副作用。
-componentDidCatch(error,info):将抛出的错误和带有componentStack key的对象作为参数。会在commit阶段调用，允许出现副作用。
-
-其他API:
-(1)setState(updater,[callback]):setState()将对组件state的更改排入队列，并通知React需要使用更新后的state重新渲染组件及其子组件。React会延迟调用它，然后通过一次传递更新多个组件。React并不会保证state的变更会立即生效，会批量推迟更新。
-使用componentShouldUpdate()和setState的回调函数保证在应用更新后触发。
-setState的第一个参数是函数或者对象，会将对象浅层合并到新的state中。如果第一个参数是对象，则是异步更新，在同一周期内会对多个setState进行批处理。
-setState的第二个参数是可选的回调函数，它将在setState完成合并并重新想渲染组件后执行，我们建议使用componentDidUpdate来代替此方法。
-(2)component.forceUpdate(callback):如果render()方法依赖于其他数据，则可以调用forceUpdate()强制让组件重新渲染，该操作会跳过该组件的shouldComponentUpdate(),但其子组件会触发正常的生命周期方法(包括shouldComponentUpdate())。
-
+dangerouslySetInnerHTML:接受的是一个带有_html属性的对象。用来设置innerHtml。
+style:接受的是一个对象，样式不会自动补齐前缀。用来设置动态需要计算的样式。
 
 
 */
