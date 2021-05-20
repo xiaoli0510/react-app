@@ -13,17 +13,4 @@
 在ts中声明一个Class的时候，声明了类的实例的类型；创建了一个叫做构造函数的值，这个函数会在new的时候调用。
 8.把类当做接口使用。
 */
-
-class Point{
-  x:number;
-  y:number;
-}
-
-interface Point3d extends Point{
-  z:number;
-}
-
-let point3d:Point3d={x:1,y:2,z:3};
-console.log(point3d);
-
-export  {Point};
+export {}
